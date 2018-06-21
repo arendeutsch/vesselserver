@@ -18,10 +18,12 @@ public class Vessel {
     private String length;
     private String width;
 
+    private String stageAnchorPoints;
+
     public Vessel() {
     }
 
-    public Vessel(Integer id, String name, String hull, int type, String date, String length, String width) {
+    public Vessel(Integer id, String name, String hull, int type, String date, String length, String width, String stageAnchorPoints) {
         super();
         this.id = id;
         this.name = name;
@@ -30,6 +32,7 @@ public class Vessel {
         this.date = date;
         this.length = length;
         this.width = width;
+        this.stageAnchorPoints = stageAnchorPoints;
     }
 
     public Integer getId() {
@@ -86,5 +89,13 @@ public class Vessel {
 
     public void setWidth(String width) {
         this.width = width;
+    }
+
+    public String getStageAnchorPoints() {
+        return stageAnchorPoints;
+    }
+
+    public void setStageAnchorPoints(String stageAnchorPoints) {
+        this.stageAnchorPoints = stageAnchorPoints;
     }
 }

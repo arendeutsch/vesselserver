@@ -27,8 +27,14 @@ public class VesselService {
         vesselRepository.save(vessel);
     }
 
-    public void updateVessel(Vessel vessel, Integer id) {
-        vesselRepository.save(vessel);
+    public Vessel updateVessel(Vessel vessel, Integer id) {
+        Optional<Vessel> vesselOptional = this.getVessel(id);
+        if (vesselOptional.isPresent()) {
+            Vessel ret = vesselOptional.get();
+            ret.setStageAnchorPoints(vessel.getStageAnchorPoints());
+            return vesselRepository.save(ret);
+        }
+        return null;
     }
 
     public void deleteVessel(Integer id) {

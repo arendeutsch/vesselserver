@@ -15,33 +15,33 @@ public class ThrusterController {
 
     @RequestMapping(value = "/vessels/{id}/thrusters", method = RequestMethod.GET)
     @CrossOrigin(origins = "http://localhost:3000")
-    public List<Thruster> getAllThrusters(@PathVariable String vesselId) {
+    public List<Thruster> getAllThrusters(@PathVariable Integer vesselId) {
         return thrusterService.getAllThrusters(vesselId);
     }
 
     @RequestMapping(value = "/vessels/{vesselId}/thrusters/{id}", method = RequestMethod.GET)
     @CrossOrigin(origins = "http://localhost:3000")
-    public Optional<Thruster> getThruster(@PathVariable String id) {
+    public Optional<Thruster> getThruster(@PathVariable Integer id) {
         return thrusterService.getThruster(id);
     }
 
     @RequestMapping(value = "/vessels/{vesselId}/thrusters", method = RequestMethod.POST)
     @CrossOrigin(origins = "http://localhost:3000")
     public void addThruster(@RequestBody Thruster thruster, @PathVariable Integer vesselId){
-        thruster.setVessel(new Vessel(vesselId, "", "", 0, "", "", ""));
+        thruster.setVessel(new Vessel(vesselId, "", "", 0, "", "", "", ""));
         thrusterService.addThruster(thruster);
     }
 
     @RequestMapping(value =  "/vessels/{vesselId}/thrusters/{id}", method = RequestMethod.PUT)
     @CrossOrigin(origins = "http://localhost:3000")
-    public void updateThruster(@RequestBody Thruster thruster, @PathVariable String id, @PathVariable Integer vesselId){
-        thruster.setVessel(new Vessel(vesselId, "", "", 0, "", "", ""));
+    public void updateThruster(@RequestBody Thruster thruster, @PathVariable Integer id, @PathVariable Integer vesselId){
+        thruster.setVessel(new Vessel(vesselId, "", "", 0, "", "", "", ""));
         thrusterService.updateThruster(thruster);
     }
 
     @RequestMapping(value = "/vessels/{vesselId}/thrusters/{id}", method = RequestMethod.DELETE)
     @CrossOrigin(origins = "http://localhost:3000")
-    public void deleteThruster(@PathVariable String id) {
+    public void deleteThruster(@PathVariable Integer id) {
         thrusterService.deleteThruster(id);
     }
 }

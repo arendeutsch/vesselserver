@@ -13,13 +13,13 @@ public class ThrusterService {
     @Autowired
     private ThrusterRepository thrusterRepository;
 
-    public List<Thruster> getAllThrusters(String vesselId) {
+    public List<Thruster> getAllThrusters(Integer vesselId) {
         List<Thruster> thrusters = new ArrayList<>();
         thrusterRepository.findByVesselId(vesselId).forEach(thrusters::add);
         return thrusters;
     }
 
-    public Optional<Thruster> getThruster(String id) {
+    public Optional<Thruster> getThruster(Integer id) {
         return thrusterRepository.findById(id);
     }
 
@@ -31,7 +31,7 @@ public class ThrusterService {
         thrusterRepository.save(thruster);
     }
 
-    public void deleteThruster(String id) {
+    public void deleteThruster(Integer id) {
         thrusterRepository.deleteById(id);
     }
 }

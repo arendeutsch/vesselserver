@@ -1,6 +1,8 @@
 package aegirdynamics.com.joystickserver.vessel;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +22,13 @@ public class VesselController {
 
     @RequestMapping(value = "/vessels/{id}", method = RequestMethod.GET)
     @CrossOrigin(origins = "http://localhost:3000")
-    public Optional<Vessel> getVessel(@PathVariable Integer id) {
-        return vesselService.getVessel(id);
+    public ResponseEntity<Optional<Vessel>> getVessel(@PathVariable Integer id) {
+        Optional<Vessel> vessel = vesselService.getVessel(id);
+        if (vessel.isPresent()) {
+            return new ResponseEntity<>(vessel, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(vessel, HttpStatus.NOT_FOUND);
+        }
     }
 
     @RequestMapping(value = "/vessels", method = RequestMethod.POST)
@@ -32,8 +39,13 @@ public class VesselController {
 
     @RequestMapping(value = "/vessels/{id}", method = RequestMethod.PUT)
     @CrossOrigin(origins = "http://localhost:3000")
-    public void updateVessel(@RequestBody Vessel vessel, @PathVariable Integer id){
-        vesselService.updateVessel(vessel, id);
+    public ResponseEntity<Vessel> updateVessel(@RequestBody Vessel vessel, @PathVariable Integer id){
+        Vessel ret = vesselService.updateVessel(vessel, id);
+        if (ret != null) {
+            return new ResponseEntity<>(ret, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(ret, HttpStatus.NOT_FOUND);
+        }
     }
 
     @RequestMapping(value = "/vessels/{id}", method = RequestMethod.DELETE)
