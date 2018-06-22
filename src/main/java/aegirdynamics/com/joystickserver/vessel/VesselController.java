@@ -39,8 +39,8 @@ public class VesselController {
 
     @RequestMapping(value = "/vessels", method = RequestMethod.POST)
     @CrossOrigin(origins = "http://localhost:3000")
-    public void addVessel(@RequestBody Vessel vessel){
-        vesselService.addVessel(vessel);
+    public Vessel addVessel(@RequestBody Vessel vessel){
+        return vesselService.addVessel(vessel);
     }
 
     @RequestMapping(value = "/vessels/{id}", method = RequestMethod.PUT)

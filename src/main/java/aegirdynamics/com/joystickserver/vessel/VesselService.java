@@ -35,8 +35,8 @@ public class VesselService {
         return vesselRepository.findById(id);
     }
 
-    public void addVessel(Vessel vessel) {
-        vesselRepository.save(vessel);
+    public Vessel addVessel(Vessel vessel) {
+        return vesselRepository.save(vessel);
     }
 
     public Vessel updateVessel(Vessel vessel, Integer id) {

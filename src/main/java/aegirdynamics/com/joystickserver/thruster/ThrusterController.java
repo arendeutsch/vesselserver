@@ -13,7 +13,7 @@ public class ThrusterController {
     @Autowired
     private ThrusterService thrusterService;
 
-    @RequestMapping(value = "/vessels/{id}/thrusters", method = RequestMethod.GET)
+    @RequestMapping(value = "/vessels/{vesselId}/thrusters", method = RequestMethod.GET)
     @CrossOrigin(origins = "http://localhost:3000")
     public List<Thruster> getAllThrusters(@PathVariable Integer vesselId) {
         return thrusterService.getAllThrusters(vesselId);
