@@ -1,10 +1,7 @@
 package aegirdynamics.com.joystickserver.vesselType;
 
-import aegirdynamics.com.joystickserver.vessel.Vessel;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 
 @Entity
 public class VesselType {
@@ -12,8 +9,6 @@ public class VesselType {
     @Id
     private Integer id;
     private String type;
-    @OneToOne
-    private Vessel vessel;
 
     public VesselType(){
 
