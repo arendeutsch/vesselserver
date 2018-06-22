@@ -48,6 +48,15 @@ public class DatabaseSeeder {
             vessel.setWidth("11");
             vessel.setType(2);
             vesselRepository.save(vessel);
+
+            vessel.setId(2);
+            vessel.setName("Edda Ferd");
+            vessel.setHull("H784");
+            vessel.setDate("2012-08-22");
+            vessel.setLength("86");
+            vessel.setWidth("13");
+            vessel.setType(1);
+            vesselRepository.save(vessel);
         } else {
             System.out.println("Users Seeding Not Required");
         }
@@ -59,13 +68,13 @@ public class DatabaseSeeder {
         if(list.size() <= 0) {
             VesselType vt = new VesselType();
             vt.setId(1);
-            vt.setType("Tunnel");
+            vt.setType("Cargo");
             vesselTypeRepository.save(vt);
             vt.setId(2);
-            vt.setType("Azimuth");
+            vt.setType("OSV");
             vesselTypeRepository.save(vt);
             vt.setId(3);
-            vt.setType("Rudder");
+            vt.setType("Tug");
             vesselTypeRepository.save(vt);
             System.out.println("Users Seeded");
         } else {

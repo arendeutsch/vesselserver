@@ -20,6 +20,12 @@ public class VesselController {
         return vesselService.getAllVessels();
     }
 
+    @RequestMapping(value = "/vesselstypes", method = RequestMethod.GET)
+    @CrossOrigin(origins = "http://localhost:3000")
+    public List getAllVesselsList() {
+        return vesselService.getAllVesselsWithTypes();
+    }
+
     @RequestMapping(value = "/vessels/{id}", method = RequestMethod.GET)
     @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<Optional<Vessel>> getVessel(@PathVariable Integer id) {
