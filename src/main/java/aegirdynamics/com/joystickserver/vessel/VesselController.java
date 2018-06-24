@@ -2,10 +2,12 @@ package aegirdynamics.com.joystickserver.vessel;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -58,5 +60,11 @@ public class VesselController {
     @CrossOrigin(origins = "http://localhost:3000")
     public void deleteVessel(@PathVariable Integer id) {
         vesselService.deleteVessel(id);
+    }
+
+    @RequestMapping(value = "/vessel/jcmd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @CrossOrigin(origins = "http://localhost:3000")
+    public void getJoyCmd(@RequestBody Map<String, String> cmd){
+        vesselService.getJoyCmd(cmd);
     }
 }

@@ -14,6 +14,7 @@ public class Thruster {
     private Integer type;
     private String x_cg;
     private String y_cg;
+    private String effect;
     @Lob
     private String stageNode;
     @ManyToOne
@@ -22,13 +23,14 @@ public class Thruster {
     public Thruster() {
     }
 
-    public Thruster(Integer id, int number, int type, String x_cg, String y_cg, String stageNode, Integer vesselId) {
+    public Thruster(Integer id, int number, int type, String x_cg, String y_cg, String effect, String stageNode, Integer vesselId) {
         super();
         this.id = id;
         this.number = number;
         this.type = type;
         this.x_cg = x_cg;
         this.y_cg = y_cg;
+        this.effect = effect;
         this.stageNode = stageNode;
 
         this.vessel = new Vessel(vesselId, "", "", 0, "", "", "", "");
@@ -80,6 +82,14 @@ public class Thruster {
 
     public void setY_cg(String y_cg) {
         this.y_cg = y_cg;
+    }
+
+    public String getEffect() {
+        return effect;
+    }
+
+    public void setEffect(String effect) {
+        this.effect = effect;
     }
 
     public String getStageNode() {

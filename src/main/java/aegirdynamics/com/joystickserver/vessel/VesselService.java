@@ -8,6 +8,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -51,5 +52,14 @@ public class VesselService {
 
     public void deleteVessel(Integer id) {
         vesselRepository.deleteById(id);
+    }
+
+    public void getJoyCmd(Map<String, String> cmd) {
+        String thrust = cmd.get("thrust");
+        String angleDeg = cmd.get("angleDeg");
+        String angleRad = cmd.get("angleRad");
+        System.out.println("thrust[%]: " + thrust);
+        System.out.println("Angle[Deg]: " + angleDeg);
+        System.out.println("Angle[rad]: " + angleRad);
     }
 }
