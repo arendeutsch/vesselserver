@@ -14,6 +14,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import aegirdynamics.com.joystickserver.joyController.joystick;
+
 import java.util.List;
 
 @Component
