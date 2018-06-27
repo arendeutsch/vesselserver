@@ -62,9 +62,14 @@ public class VesselController {
         vesselService.deleteVessel(id);
     }
 
-    @RequestMapping(value = "/vessel/jcmd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/vessel/{id}/getSolution", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(origins = "http://localhost:3000")
-    public void getJoyCmd(@RequestBody Map<String, String> cmd){
-        vesselService.getJoyCmd(cmd);
+    public ResponseEntity<String> getThrust(@PathVariable Integer id, @RequestBody Map<String, String> cmd){
+        String response = vesselService.allocateThrust(id, cmd);
+        if (response.isEmpty()) {
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } else {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
 }

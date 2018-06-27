@@ -1,5 +1,15 @@
 package aegirdynamics.com.joystickserver.vessel;
 
+import aegirdynamics.com.joystickserver.thruster.Thruster;
+import aegirdynamics.com.joystickserver.thruster.ThrusterService;
+import aegirdynamics.com.joystickserver.thrusterType.ThrusterType;
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import com.joptimizer.exception.JOptimizerException;
+import com.joptimizer.functions.ConvexMultivariateRealFunction;
+import com.joptimizer.functions.PDQuadraticMultivariateRealFunction;
+import com.joptimizer.optimizers.JOptimizer;
+import com.joptimizer.optimizers.OptimizationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +28,8 @@ public class VesselService {
 
     @Autowired
     private VesselRepository vesselRepository;
+    @Autowired
+    private ThrusterService thrusterService;
     @PersistenceContext
     private EntityManager em;
 
@@ -54,12 +66,115 @@ public class VesselService {
         vesselRepository.deleteById(id);
     }
 
-    public void getJoyCmd(Map<String, String> cmd) {
-        String thrust = cmd.get("thrust");
-        String angleDeg = cmd.get("angleDeg");
-        String angleRad = cmd.get("angleRad");
-        System.out.println("thrust[%]: " + thrust);
-        System.out.println("Angle[Deg]: " + angleDeg);
-        System.out.println("Angle[rad]: " + angleRad);
+    public String allocateThrust(int vesselId, Map<String, String> cmd) {
+        Double thrust = Double.parseDouble(cmd.get("thrust"));
+        Double angleDeg = Double.parseDouble(cmd.get("angleDeg"));
+        Double angleRad = Double.parseDouble(cmd.get("angleRad"));
+
+        double[] force = {thrust, angleDeg}; // TODO:: map force to x y z
+        try {
+            double[] sol = this.calculateSolution(vesselId, force);
+            double angle1 = Math.atan2(sol[3],sol[2]);
+            double angle2 = Math.atan2(sol[5],sol[4]);
+            double thrust3 = Math.sqrt(Math.pow(sol[2], 2)+Math.pow(sol[3], 2));
+            double thrust4 = Math.sqrt(Math.pow(sol[4], 2)+Math.pow(sol[5], 2));
+
+            String serverResponse = ("\nThruster 1 [%]: " + sol[0] / 2300 * 100) +
+                    "\nThruster 2 [%]: " + sol[1] / 2300 * 100 +
+                    "\nThruster 3 [%]: " + thrust3 / 2500 * 100 + " angle = " + angle1 * 180 / Math.PI +
+                    "\nThruster 4 [%]: " + thrust4 / 2500 * 100 + " angle = " + angle2 * 180 / Math.PI;
+            return serverResponse;
+        } catch (JOptimizerException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private double[] calculateSolution(int vesselId, double[] force) throws JOptimizerException {
+//        Vessel vessel = new Vessel();
+        List<Thruster> thrusters = thrusterService.getAllThrusters(vesselId); // List all of vessel thrusters with the vessel it self
+
+        Vessel vessel = thrusters.get(0).getVessel();
+
+//        double[] powerCoeffecients = {1,1,0.533,0.533,0.533,0.533};
+        ArrayList<Double> powerCoefficients = new ArrayList<>();
+
+        for (Thruster thruster : thrusters) {
+            switch (thruster.getType()) {
+                case ThrusterType.TUNNEL:
+                    powerCoefficients.add(1.0);
+                    break;
+                case ThrusterType.AZIMUTH:
+                    powerCoefficients.add(0.533);
+                    powerCoefficients.add(0.533);
+                    break;
+                case ThrusterType.RUDDER:
+                    //TODO
+                    break;
+            }
+        }
+        vessel.setHMatrix(6, powerCoefficients);
+
+        //inequalities
+        ConvexMultivariateRealFunction[] inequalities = new ConvexMultivariateRealFunction[2];
+
+        //optimization problem
+        OptimizationRequest or = new OptimizationRequest();
+        //or.setInitialPoint(new double[] {0.1,0.9});
+        //or.setFi(inequalities); //if you want x>0 and y>0
+
+        or.setToleranceFeas(1.E-12);
+        or.setTolerance(1.E-12);
+
+        //optimization
+        JOptimizer opt = new JOptimizer();
+        PDQuadraticMultivariateRealFunction objective = new PDQuadraticMultivariateRealFunction(vessel.getHMatrix().toArray(), null, 0);
+
+//        String[] thrusterType = {"tunnel","tunnel","azimuth","azimuth"};
+//        double[] thrusterPositionFromCG = {34,30,11,-35,-11,-35};
+
+        ArrayList<Integer> thrusterType = new ArrayList<>();
+        ArrayList<Double> thrusterPositionFromCG = new ArrayList<>();
+
+        for (Thruster thruster : thrusters) {
+            thrusterType.add(thruster.getType());
+            switch (thruster.getType()) {
+                case ThrusterType.TUNNEL:
+                    thrusterPositionFromCG.add(Double.parseDouble(thruster.getY_cg()));
+                    break;
+                case ThrusterType.AZIMUTH:
+                    thrusterPositionFromCG.add(Double.parseDouble(thruster.getX_cg()));
+                    thrusterPositionFromCG.add(Double.parseDouble(thruster.getY_cg()));
+                    break;
+                case ThrusterType.RUDDER:
+                    //TODO
+                    break;
+            }
+        }
+
+        vessel.setEqualityConstraintsMatrix(thrusterType, thrusterPositionFromCG);
+
+        DoubleMatrix1D beq = new DenseDoubleMatrix1D(new double[]{1350, 888.2873, 54987.42});
+
+        long startTime = System.currentTimeMillis();
+
+        //optimization problem
+        OptimizationRequest orr = new OptimizationRequest();
+        orr.setF0(objective);
+        orr.setA(vessel.getEqualityConstraintsMatrix().toArray());
+        orr.setB(beq.toArray());
+        opt.setOptimizationRequest(orr);
+        //int returnCode = opt.optimize();
+        opt.optimize();
+
+        double[] sol = opt.getOptimizationResponse().getSolution();
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Execution time with QP " + (endTime - startTime) + " milliseconds");
+
+//        System.out.println("\nThe optimal solution for " + beq.get(0) + " surge " + beq.get(1) + " sway " + beq.get(2) + " yaw is:"  );
+
+        return sol;
     }
 }

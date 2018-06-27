@@ -10,6 +10,11 @@ public class ThrusterType {
     private Integer id;
     private String type;
 
+    public static final int TUNNEL = 1;
+    public static final int AZIMUTH = 2;
+    public static final int RUDDER = 3;
+
+
     public ThrusterType(){
 
     }

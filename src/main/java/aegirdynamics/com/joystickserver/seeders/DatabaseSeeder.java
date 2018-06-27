@@ -46,6 +46,7 @@ public class DatabaseSeeder {
         seedVesselTypeTable();
         seedThrusterTypeTable();
         seedVesselTable();
+//        joystick.readCmd();
     }
 
     private void seedThrusterTypeTable() {
@@ -134,7 +135,7 @@ public class DatabaseSeeder {
             t2.setEffect("800");
             t2.setType(1);
             t2.setX_cg("7");
-            t2.setY_cg("31");
+            t2.setY_cg("30");
             t2.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":229,\"y\":129,\"rotation\":90,\"width\":14,\"height\":85,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"}");
             t2.setVessel(vessel);
             thrusterRepository.save(t2);
@@ -143,8 +144,8 @@ public class DatabaseSeeder {
             t3.setNumber(3);
             t3.setEffect("1200");
             t3.setType(2);
-            t3.setX_cg("-5");
-            t3.setY_cg("-36");
+            t3.setX_cg("11");
+            t3.setY_cg("-35");
             t3.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":101,\"y\":333,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffset\":{\"x\":8,\"y\":8},\"startScale\":1,\"shadowOffsetX\":null,\"shadowOffsetY\":null},\"className\":\"Group\",\"children\":[{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Ring\"},{\"attrs\":{\"x\":-7,\"y\":-37,\"width\":14,\"height\":74,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"},{\"attrs\":{\"y\":-45,\"sides\":3,\"radius\":6.5,\"stroke\":\"black\",\"strokeWidth\":1,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"RegularPolygon\"}]}");
             t3.setVessel(vessel);
             thrusterRepository.save(t3);
@@ -153,8 +154,8 @@ public class DatabaseSeeder {
             t4.setNumber(4);
             t4.setEffect("1200");
             t4.setType(2);
-            t4.setX_cg("5");
-            t4.setY_cg("-36");
+            t4.setX_cg("-11");
+            t4.setY_cg("-35");
             t4.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":261,\"y\":330,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffset\":{\"x\":8,\"y\":8},\"startScale\":1,\"shadowOffsetX\":null,\"shadowOffsetY\":null},\"className\":\"Group\",\"children\":[{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Ring\"},{\"attrs\":{\"x\":-7,\"y\":-37,\"width\":14,\"height\":74,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"},{\"attrs\":{\"y\":-45,\"sides\":3,\"radius\":6.5,\"stroke\":\"black\",\"strokeWidth\":1,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"RegularPolygon\"}]}");
             t4.setVessel(vessel);
             thrusterRepository.save(t4);
