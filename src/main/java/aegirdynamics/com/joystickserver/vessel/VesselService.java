@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class VesselService {
@@ -66,12 +63,11 @@ public class VesselService {
         vesselRepository.deleteById(id);
     }
 
-    public String allocateThrust(int vesselId, Map<String, String> cmd) {
-        Double thrust = Double.parseDouble(cmd.get("thrust"));
-        Double angleDeg = Double.parseDouble(cmd.get("angleDeg"));
-        Double angleRad = Double.parseDouble(cmd.get("angleRad"));
-
-        double[] force = {thrust, angleDeg}; // TODO:: map force to x y z
+    public HashMap<String, double[]> allocateThrust(int vesselId, Map<String, String> cmd) {
+        Double surge = Double.parseDouble(cmd.get("surge"));
+        Double sway = Double.parseDouble(cmd.get("sway"));
+        // TODO: get yaw rotation (z axis)
+        double[] force = {surge, sway, 0};
         try {
             double[] sol = this.calculateSolution(vesselId, force);
             double angle1 = Math.atan2(sol[3],sol[2]);
@@ -79,11 +75,23 @@ public class VesselService {
             double thrust3 = Math.sqrt(Math.pow(sol[2], 2)+Math.pow(sol[3], 2));
             double thrust4 = Math.sqrt(Math.pow(sol[4], 2)+Math.pow(sol[5], 2));
 
-            String serverResponse = ("\nThruster 1 [%]: " + sol[0] / 2300 * 100) +
-                    "\nThruster 2 [%]: " + sol[1] / 2300 * 100 +
-                    "\nThruster 3 [%]: " + thrust3 / 2500 * 100 + " angle = " + angle1 * 180 / Math.PI +
-                    "\nThruster 4 [%]: " + thrust4 / 2500 * 100 + " angle = " + angle2 * 180 / Math.PI;
-            return serverResponse;
+            String serverResponse = ("\nThruster 1 [%]: " + sol[0]) +
+                    "\nThruster 2 [%]: " + sol[1]+
+                    "\nThruster 3 [%]: " + thrust3 + " angle = " + angle1 * 180 / Math.PI +
+                    "\nThruster 4 [%]: " + thrust4 + " angle = " + angle2 * 180 / Math.PI;
+
+//            String serverResponse = ("\nThruster 1 [%]: " + sol[0] / 2300 * 100) +
+//                    "\nThruster 2 [%]: " + sol[1] / 2300 * 100 +
+//                    "\nThruster 3 [%]: " + thrust3 / 2500 * 100 + " angle = " + angle1 * 180 / Math.PI +
+//                    "\nThruster 4 [%]: " + thrust4 / 2500 * 100 + " angle = " + angle2 * 180 / Math.PI;
+
+            double[] thrust = {sol[0], sol[1], thrust3, thrust4};
+            double[] angles = {0.0, 0.0, angle1 * 180 / Math.PI, angle2 * 180 / Math.PI};
+            HashMap<String, double[]> responseSolution = new HashMap<>();
+            responseSolution.put("thrust", thrust);
+            responseSolution.put("angle", angles);
+
+            return responseSolution;
         } catch (JOptimizerException e) {
             e.printStackTrace();
         }
@@ -155,7 +163,8 @@ public class VesselService {
 
         vessel.setEqualityConstraintsMatrix(thrusterType, thrusterPositionFromCG);
 
-        DoubleMatrix1D beq = new DenseDoubleMatrix1D(new double[]{1350, 888.2873, 54987.42});
+//        DoubleMatrix1D beq = new DenseDoubleMatrix1D(new double[]{1350, 888.2873, 54987.42});
+        DoubleMatrix1D beq = new DenseDoubleMatrix1D(force);
 
         long startTime = System.currentTimeMillis();
 
@@ -165,7 +174,6 @@ public class VesselService {
         orr.setA(vessel.getEqualityConstraintsMatrix().toArray());
         orr.setB(beq.toArray());
         opt.setOptimizationRequest(orr);
-        //int returnCode = opt.optimize();
         opt.optimize();
 
         double[] sol = opt.getOptimizationResponse().getSolution();

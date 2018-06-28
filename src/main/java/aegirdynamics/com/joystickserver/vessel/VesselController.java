@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,8 +65,8 @@ public class VesselController {
 
     @RequestMapping(value = "/vessel/{id}/getSolution", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<String> getThrust(@PathVariable Integer id, @RequestBody Map<String, String> cmd){
-        String response = vesselService.allocateThrust(id, cmd);
+    public ResponseEntity<HashMap<String, double[]>> getThrust(@PathVariable Integer id, @RequestBody Map<String, String> cmd){
+        HashMap<String, double[]> response = vesselService.allocateThrust(id, cmd);
         if (response.isEmpty()) {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         } else {
