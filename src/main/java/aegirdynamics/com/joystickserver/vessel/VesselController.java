@@ -65,8 +65,8 @@ public class VesselController {
 
     @RequestMapping(value = "/vessel/{id}/getSolution", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<HashMap<String, double[]>> getThrust(@PathVariable Integer id, @RequestBody Map<String, String> cmd){
-        HashMap<String, double[]> response = vesselService.allocateThrust(id, cmd);
+    public ResponseEntity<HashMap<String, Object[]>> getThrust(@PathVariable Integer id, @RequestBody Map<String, String> cmd){
+        HashMap<String, Object[]> response = vesselService.allocateThrust(id, cmd);
         if (response.isEmpty()) {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         } else {

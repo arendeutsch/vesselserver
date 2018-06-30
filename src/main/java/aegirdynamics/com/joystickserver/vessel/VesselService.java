@@ -63,33 +63,67 @@ public class VesselService {
         vesselRepository.deleteById(id);
     }
 
-    public HashMap<String, double[]> allocateThrust(int vesselId, Map<String, String> cmd) {
+    public HashMap<String, Object[]> allocateThrust(int vesselId, Map<String, String> cmd) {
         Double surge = Double.parseDouble(cmd.get("surge"));
         Double sway = Double.parseDouble(cmd.get("sway"));
         // TODO: get yaw rotation (z axis)
-        double[] force = {surge, sway, 0};
+        double[] force = {surge, sway, 0.0};
         try {
             double[] sol = this.calculateSolution(vesselId, force);
-            double angle1 = Math.atan2(sol[3],sol[2]);
-            double angle2 = Math.atan2(sol[5],sol[4]);
-            double thrust3 = Math.sqrt(Math.pow(sol[2], 2)+Math.pow(sol[3], 2));
-            double thrust4 = Math.sqrt(Math.pow(sol[4], 2)+Math.pow(sol[5], 2));
+            HashMap<String, Object[]> responseSolution = new HashMap<>();
 
-            String serverResponse = ("\nThruster 1 [%]: " + sol[0]) +
-                    "\nThruster 2 [%]: " + sol[1]+
-                    "\nThruster 3 [%]: " + thrust3 + " angle = " + angle1 * 180 / Math.PI +
-                    "\nThruster 4 [%]: " + thrust4 + " angle = " + angle2 * 180 / Math.PI;
+            ArrayList<Double> thrust = new ArrayList<>();
+            ArrayList<Double> angle = new ArrayList<>();
+            ArrayList<Integer> type = new ArrayList<>();
 
-//            String serverResponse = ("\nThruster 1 [%]: " + sol[0] / 2300 * 100) +
+            List<Thruster> thrusters = thrusterService.getAllThrusters(vesselId); // List all of vessel thrusters with the vessel it self
+            int index = 0;
+            for (Thruster thruster : thrusters) {
+                switch (thruster.getType()) {
+                    case ThrusterType.TUNNEL:
+                        type.add(ThrusterType.TUNNEL);
+                        thrust.add(sol[index]);
+                        angle.add(0.0);
+                        index++;
+                        break;
+                    case ThrusterType.AZIMUTH:
+                        type.add(ThrusterType.AZIMUTH);
+                        thrust.add(Math.sqrt(Math.pow(sol[index], 2) + Math.pow(sol[index+1], 2)));
+                        angle.add((Math.atan2(sol[index+1],sol[index]) * 180/Math.PI));
+                        index+=2;
+                        break;
+                    case ThrusterType.RUDDER:
+                        //TODO
+                        break;
+                }
+            }
+//            double angle1 = Math.atan2(sol[3],sol[2]);
+//            double angle2 = Math.atan2(sol[5],sol[4]);
+//            double thrust3 = Math.sqrt(Math.pow(sol[2], 2)+Math.pow(sol[3], 2));
+//            double thrust4 = Math.sqrt(Math.pow(sol[4], 2)+Math.pow(sol[5], 2));
+//
+//            System.out.println("\nThruster 1 [%]: " + sol[0] +
+//                    "\nThruster 2 [%]: " + sol[1]+
+//                    "\nThruster 3 [%]: " + thrust3 + " angle = " + angle1 * 180 / Math.PI +
+//                    "\nThruster 4 [%]: " + thrust4 + " angle = " + angle2 * 180 / Math.PI);
+
+//            System.out.println("\nThruster 1 [%]: " + sol[0] / 2300 * 100 +
 //                    "\nThruster 2 [%]: " + sol[1] / 2300 * 100 +
 //                    "\nThruster 3 [%]: " + thrust3 / 2500 * 100 + " angle = " + angle1 * 180 / Math.PI +
-//                    "\nThruster 4 [%]: " + thrust4 / 2500 * 100 + " angle = " + angle2 * 180 / Math.PI;
+//                    "\nThruster 4 [%]: " + thrust4 / 2500 * 100 + " angle = " + angle2 * 180 / Math.PI);
 
-            double[] thrust = {sol[0], sol[1], thrust3, thrust4};
-            double[] angles = {0.0, 0.0, angle1 * 180 / Math.PI, angle2 * 180 / Math.PI};
-            HashMap<String, double[]> responseSolution = new HashMap<>();
-            responseSolution.put("thrust", thrust);
-            responseSolution.put("angle", angles);
+            Double[] thrustArray = new Double[thrust.size()];
+            thrustArray = thrust.toArray(thrustArray);
+
+            Double[] angleArray = new Double[angle.size()];
+            angleArray = angle.toArray(angleArray);
+
+            Integer[] typeArray = new Integer[type.size()];
+            typeArray = type.toArray(typeArray);
+
+            responseSolution.put("thrust", thrustArray);
+            responseSolution.put("angle", angleArray);
+            responseSolution.put("thruster_type", typeArray);
 
             return responseSolution;
         } catch (JOptimizerException e) {
@@ -100,58 +134,25 @@ public class VesselService {
     }
 
     private double[] calculateSolution(int vesselId, double[] force) throws JOptimizerException {
-//        Vessel vessel = new Vessel();
+        long startTime = System.currentTimeMillis();
         List<Thruster> thrusters = thrusterService.getAllThrusters(vesselId); // List all of vessel thrusters with the vessel it self
 
         Vessel vessel = thrusters.get(0).getVessel();
 
 //        double[] powerCoeffecients = {1,1,0.533,0.533,0.533,0.533};
         ArrayList<Double> powerCoefficients = new ArrayList<>();
-
-        for (Thruster thruster : thrusters) {
-            switch (thruster.getType()) {
-                case ThrusterType.TUNNEL:
-                    powerCoefficients.add(1.0);
-                    break;
-                case ThrusterType.AZIMUTH:
-                    powerCoefficients.add(0.533);
-                    powerCoefficients.add(0.533);
-                    break;
-                case ThrusterType.RUDDER:
-                    //TODO
-                    break;
-            }
-        }
-        vessel.setHMatrix(6, powerCoefficients);
-
-        //inequalities
-        ConvexMultivariateRealFunction[] inequalities = new ConvexMultivariateRealFunction[2];
-
-        //optimization problem
-        OptimizationRequest or = new OptimizationRequest();
-        //or.setInitialPoint(new double[] {0.1,0.9});
-        //or.setFi(inequalities); //if you want x>0 and y>0
-
-        or.setToleranceFeas(1.E-12);
-        or.setTolerance(1.E-12);
-
-        //optimization
-        JOptimizer opt = new JOptimizer();
-        PDQuadraticMultivariateRealFunction objective = new PDQuadraticMultivariateRealFunction(vessel.getHMatrix().toArray(), null, 0);
-
-//        String[] thrusterType = {"tunnel","tunnel","azimuth","azimuth"};
-//        double[] thrusterPositionFromCG = {34,30,11,-35,-11,-35};
-
         ArrayList<Integer> thrusterType = new ArrayList<>();
         ArrayList<Double> thrusterPositionFromCG = new ArrayList<>();
-
         for (Thruster thruster : thrusters) {
             thrusterType.add(thruster.getType());
             switch (thruster.getType()) {
                 case ThrusterType.TUNNEL:
+                    powerCoefficients.add(1.0);
                     thrusterPositionFromCG.add(Double.parseDouble(thruster.getY_cg()));
                     break;
                 case ThrusterType.AZIMUTH:
+                    powerCoefficients.add(0.533);
+                    powerCoefficients.add(0.533);
                     thrusterPositionFromCG.add(Double.parseDouble(thruster.getX_cg()));
                     thrusterPositionFromCG.add(Double.parseDouble(thruster.getY_cg()));
                     break;
@@ -160,13 +161,26 @@ public class VesselService {
                     break;
             }
         }
-
+        vessel.setHMatrix(powerCoefficients.size(), powerCoefficients);
         vessel.setEqualityConstraintsMatrix(thrusterType, thrusterPositionFromCG);
 
 //        DoubleMatrix1D beq = new DenseDoubleMatrix1D(new double[]{1350, 888.2873, 54987.42});
         DoubleMatrix1D beq = new DenseDoubleMatrix1D(force);
 
-        long startTime = System.currentTimeMillis();
+        //inequalities
+        ConvexMultivariateRealFunction[] inequalities = new ConvexMultivariateRealFunction[2];
+
+        //optimization problem
+        OptimizationRequest or = new OptimizationRequest();
+//        or.setInitialPoint(new double[] {0.1,0.9});
+        //or.setFi(inequalities); //if you want x>0 and y>0
+
+        or.setToleranceFeas(1.E-12);
+        or.setTolerance(1.E-12);
+
+        //optimization
+        JOptimizer opt = new JOptimizer();
+        PDQuadraticMultivariateRealFunction objective = new PDQuadraticMultivariateRealFunction(vessel.getHMatrix().toArray(), null, 0);
 
         //optimization problem
         OptimizationRequest orr = new OptimizationRequest();
@@ -180,8 +194,6 @@ public class VesselService {
 
         long endTime = System.currentTimeMillis();
         System.out.println("Execution time with QP " + (endTime - startTime) + " milliseconds");
-
-//        System.out.println("\nThe optimal solution for " + beq.get(0) + " surge " + beq.get(1) + " sway " + beq.get(2) + " yaw is:"  );
 
         return sol;
     }

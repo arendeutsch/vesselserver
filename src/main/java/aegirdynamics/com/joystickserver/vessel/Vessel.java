@@ -143,7 +143,6 @@ public class Vessel {
                     break;
                 default:
                     throw new IllegalArgumentException("Invalid thruster type: " + thrusters.get(i));
-
             }
         }
     }
