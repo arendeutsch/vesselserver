@@ -1,5 +1,6 @@
 package aegirdynamics.com.joystickserver.thruster;
 
+import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

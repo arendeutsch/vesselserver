@@ -106,7 +106,8 @@ public class DatabaseSeeder {
             vessel.setDate("2011-05-12");
             vessel.setLength("76.66");
             vessel.setWidth("16.41");
-            vessel.setStageAnchorPoints("[41,133,164,13,224,10,328,145,325,165,326,265,326,366,325,383,229,398,125,401,40,389,38,374,35,281,36,153]");
+//            vessel.setStageAnchorPoints("[41,133,164,13,224,10,328,145,325,165,326,265,326,366,325,383,229,398,125,401,40,389,38,374,35,281,36,153]");
+            vessel.setStageAnchorPoints("[44,145,155,0,237,-2,334,140,336,140,338,285,336,362,335,362,297,393,76,391,44,368,45,367,44,277,43,143]");
             vessel.setType(1);
             vesselRepository.save(vessel);
             System.out.println("Done seeding vessel table");

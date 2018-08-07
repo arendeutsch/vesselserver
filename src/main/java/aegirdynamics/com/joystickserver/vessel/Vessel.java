@@ -2,8 +2,8 @@ package aegirdynamics.com.joystickserver.vessel;
 import aegirdynamics.com.joystickserver.thrusterType.ThrusterType;
 
 import aegirdynamics.com.joystickserver.thrusterType.ThrusterType;
-import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.tdouble.DoubleMatrix2D;
+import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix2D;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

@@ -3,10 +3,11 @@ package aegirdynamics.com.joystickserver.vessel;
 import aegirdynamics.com.joystickserver.thruster.Thruster;
 import aegirdynamics.com.joystickserver.thruster.ThrusterService;
 import aegirdynamics.com.joystickserver.thrusterType.ThrusterType;
-import cern.colt.matrix.DoubleMatrix1D;
-import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.tdouble.DoubleMatrix1D;
+import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix1D;
 import com.joptimizer.exception.JOptimizerException;
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
+import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.functions.PDQuadraticMultivariateRealFunction;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
@@ -168,7 +169,7 @@ public class VesselService {
         DoubleMatrix1D beq = new DenseDoubleMatrix1D(force);
 
         //inequalities
-        ConvexMultivariateRealFunction[] inequalities = new ConvexMultivariateRealFunction[2];
+        ConvexMultivariateRealFunction[] inequalities = this.setForbiddenZones(thrusters, 24);
 
         //optimization problem
         OptimizationRequest or = new OptimizationRequest();
@@ -196,5 +197,38 @@ public class VesselService {
         System.out.println("Execution time with QP " + (endTime - startTime) + " milliseconds");
 
         return sol;
+    }
+
+    private ConvexMultivariateRealFunction[] setForbiddenZones(List<Thruster> thrusters, int n) {
+        // length of matrix is: forbidden for tunnel + n which is number of lines for linear approximation for azimuth multiply by number of azimuths
+        int size = 0;
+        for (Thruster i : thrusters) {
+            switch (i.getType()) {
+                case ThrusterType.TUNNEL:
+                    size += 2;
+                    break;
+                case ThrusterType.AZIMUTH:
+                    size += n;
+                    break;
+                case ThrusterType.RUDDER:
+                    //TODO
+                    break;
+            }
+        }
+        ConvexMultivariateRealFunction[] inequalities = new ConvexMultivariateRealFunction[size];
+        for (Thruster thruster : thrusters) {
+            switch (thruster.getType()) {
+                case ThrusterType.TUNNEL:
+                    inequalities[0] = new LinearMultivariateRealFunction(new double[]{-1.0, 0.0}, 0.0);  // focus: -x+0 <= 0
+                    break;
+                case ThrusterType.AZIMUTH:
+                    break;
+                case ThrusterType.RUDDER:
+                    //TODO
+                    break;
+            }
+        }
+
+        return inequalities;
     }
 }
