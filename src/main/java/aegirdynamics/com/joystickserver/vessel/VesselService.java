@@ -122,6 +122,12 @@ public class VesselService {
             Integer[] typeArray = new Integer[type.size()];
             typeArray = type.toArray(typeArray);
 
+            Double[] cmdArr = new Double[force.length];
+            cmdArr[0] = (Double)force[0];
+            cmdArr[1] = (Double)force[1];
+            cmdArr[2] = (Double)force[2];
+
+            responseSolution.put("cmd", cmdArr);
             responseSolution.put("thrust", thrustArray);
             responseSolution.put("angle", angleArray);
             responseSolution.put("thruster_type", typeArray);
@@ -168,16 +174,12 @@ public class VesselService {
 //        DoubleMatrix1D beq = new DenseDoubleMatrix1D(new double[]{1350, 888.2873, 54987.42});
         DoubleMatrix1D beq = new DenseDoubleMatrix1D(force);
 
+        int[] s = {0,0}; // decision variable
         //inequalities
-        ConvexMultivariateRealFunction[] inequalities = this.setForbiddenZones(thrusters, 24);
+        ConvexMultivariateRealFunction[] inequalities = this.setInequalities(thrusters, 24, s);
 
         //optimization problem
         OptimizationRequest or = new OptimizationRequest();
-//        or.setInitialPoint(new double[] {0.1,0.9});
-        //or.setFi(inequalities); //if you want x>0 and y>0
-
-        or.setToleranceFeas(1.E-12);
-        or.setTolerance(1.E-12);
 
         //optimization
         JOptimizer opt = new JOptimizer();
@@ -188,10 +190,26 @@ public class VesselService {
         orr.setF0(objective);
         orr.setA(vessel.getEqualityConstraintsMatrix().toArray());
         orr.setB(beq.toArray());
+//        orr.setInitialPoint(new double[] {0.1,0.9});
+        orr.setFi(inequalities); //if you want x>0 and y>0
+        orr.setToleranceFeas(1.E-6);
+        orr.setTolerance(1.E-6);
         opt.setOptimizationRequest(orr);
         opt.optimize();
 
         double[] sol = opt.getOptimizationResponse().getSolution();
+        // incase of inequalities, need to check if angle is within forbidden zone.
+        // if this is the case we need to reallocate with different decision variable s
+        double angle = Math.atan2(sol[5], sol[4]) * 180 / Math.PI;
+        if (angle > 85 && angle < 105) {
+            s[0] = 1;
+            s[1] = 0;
+            inequalities = this.setInequalities(thrusters, 24, s);
+            orr.setFi(inequalities);
+            opt.setOptimizationRequest(orr);
+            opt.optimize();
+            sol = opt.getOptimizationResponse().getSolution();
+        }
 
         long endTime = System.currentTimeMillis();
         System.out.println("Execution time with QP " + (endTime - startTime) + " milliseconds");
@@ -199,35 +217,93 @@ public class VesselService {
         return sol;
     }
 
-    private ConvexMultivariateRealFunction[] setForbiddenZones(List<Thruster> thrusters, int n) {
-        // length of matrix is: forbidden for tunnel + n which is number of lines for linear approximation for azimuth multiply by number of azimuths
-        int size = 0;
-        for (Thruster i : thrusters) {
-            switch (i.getType()) {
-                case ThrusterType.TUNNEL:
-                    size += 2;
-                    break;
-                case ThrusterType.AZIMUTH:
-                    size += n;
-                    break;
-                case ThrusterType.RUDDER:
-                    //TODO
-                    break;
-            }
-        }
-        ConvexMultivariateRealFunction[] inequalities = new ConvexMultivariateRealFunction[size];
+    private ConvexMultivariateRealFunction[] setInequalities(List<Thruster> thrusters, int N, int[] s) {
+        int numberOfColumns = 0;
+        int numberOfRows = 0;
         for (Thruster thruster : thrusters) {
             switch (thruster.getType()) {
                 case ThrusterType.TUNNEL:
-                    inequalities[0] = new LinearMultivariateRealFunction(new double[]{-1.0, 0.0}, 0.0);  // focus: -x+0 <= 0
+                    numberOfRows +=1;
+                    //TODO
                     break;
                 case ThrusterType.AZIMUTH:
+                    numberOfRows +=2;
+                    if (thruster.getForbiddenZonesActive()) {
+                        numberOfColumns+= N+2;
+                    } else {
+                        numberOfColumns+=N;
+                    }
                     break;
                 case ThrusterType.RUDDER:
                     //TODO
                     break;
             }
         }
+        ConvexMultivariateRealFunction[] inequalities = new ConvexMultivariateRealFunction[numberOfColumns];
+
+        int rowCounter = 0;
+        int columnCounter = 0;
+        double h[] = new double[numberOfRows];
+        for (Thruster thruster : thrusters) {
+            switch (thruster.getType()) {
+                case ThrusterType.TUNNEL:
+                    rowCounter +=1;
+                    //TODO
+                    break;
+                case ThrusterType.AZIMUTH:
+                    rowCounter +=2;
+                    double r = Double.valueOf(thruster.getEffect()) * Math.cos(Math.PI/N);
+                    for (int k = 0; k < N; k++) {
+                        Arrays.fill(h, 0);
+                        double theta = (2*k + 1)*Math.PI/N;
+                        h[rowCounter-2] = -Math.cos(theta);
+                        h[rowCounter-1] = -Math.sin(theta);
+                        inequalities[columnCounter + k] = new LinearMultivariateRealFunction(h, -r);
+                        columnCounter++;
+                    }
+                    if (thruster.getForbiddenZonesActive()) {
+                        Double M = Double.valueOf(thruster.getEffect()); //big-M constant
+                        // angles are counterclockwise
+                        Double startAngle = Double.valueOf(thruster.getForbiddenZoneEnd());
+                        Double endAngle = Double.valueOf(thruster.getForbiddenZoneStart());
+
+                        double forbiddenStart = startAngle * Math.PI/180;
+                        double forbiddenEnd = endAngle * Math.PI/180;
+                        h[rowCounter-2] = Math.sin(forbiddenStart);
+                        h[rowCounter-1] = -Math.cos(forbiddenStart);
+                        inequalities[columnCounter] = new LinearMultivariateRealFunction(h, -M*(1 - s[0]));
+                        columnCounter++;
+                        h[rowCounter-2] = -Math.sin(forbiddenEnd);
+                        h[rowCounter-1] = Math.cos(forbiddenEnd);
+                        inequalities[columnCounter] = new LinearMultivariateRealFunction(h, -M*(1 - s[1]));
+                        columnCounter++;
+                    }
+                    break;
+                case ThrusterType.RUDDER:
+                    //TODO
+                    break;
+            }
+        }
+
+        // Thruster 3 - azimuth
+
+        // Thruster 4 - azimuth
+//        for (int k = 0; k < N; k++) {
+//            double theta = (2*k + 1)*Math.PI/N;
+//            inequalities[k+N] = new LinearMultivariateRealFunction(new double[]{0, 0, 0, 0, -Math.cos(theta), -Math.sin(theta)}, -r);
+//        }
+
+        // adding forbidden zones to thruster 4, angles are counterclockwise
+//        if (forbiddenZones) {
+//            Double M = Double.valueOf(thrusters.get(3).getEffect()); //big-M constant
+//            double startAngle = 105;
+//            double endAngle = 85;
+//
+//            double forbiddenStart = startAngle * Math.PI/180;
+//            double forbiddenEnd = endAngle * Math.PI/180;
+//            inequalities[size-2] = new LinearMultivariateRealFunction(new double[]{0, 0, 0, 0, Math.sin(forbiddenStart), -Math.cos(forbiddenStart)}, -M*(1 - s[0]));
+//            inequalities[size-1] = new LinearMultivariateRealFunction(new double[]{0, 0, 0, 0, -Math.sin(forbiddenEnd), Math.cos(forbiddenEnd)}, -M*(1 - s[1]));
+//        }
 
         return inequalities;
     }

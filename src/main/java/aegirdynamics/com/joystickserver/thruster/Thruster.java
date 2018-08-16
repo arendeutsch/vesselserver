@@ -15,7 +15,11 @@ public class Thruster {
     private String x_cg;
     private String y_cg;
     private String effect;
-    @Lob
+    private Boolean forbiddenZonesActive;
+    private String forbiddenZoneStart;
+    private String forbiddenZoneEnd;
+//    @Lob
+    @Column(columnDefinition="TEXT")
     private String stageNode;
     @ManyToOne
     private Vessel vessel;
@@ -23,7 +27,7 @@ public class Thruster {
     public Thruster() {
     }
 
-    public Thruster(Integer id, int number, int type, String x_cg, String y_cg, String effect, String stageNode, Integer vesselId) {
+    public Thruster(Integer id, int number, int type, String x_cg, String y_cg, String effect, Boolean forbiddenZonesActive, String forbiddenZoneStart, String forbiddenZoneEnd, String stageNode, Integer vesselId) {
         super();
         this.id = id;
         this.number = number;
@@ -31,6 +35,9 @@ public class Thruster {
         this.x_cg = x_cg;
         this.y_cg = y_cg;
         this.effect = effect;
+        this.forbiddenZonesActive = forbiddenZonesActive;
+        this.forbiddenZoneStart = forbiddenZoneStart;
+        this.forbiddenZoneEnd = forbiddenZoneEnd;
         this.stageNode = stageNode;
 
         this.vessel = new Vessel(vesselId, "", "", 0, "", "", "", "");
@@ -98,5 +105,29 @@ public class Thruster {
 
     public void setStageNode(String stageNode) {
         this.stageNode = stageNode;
+    }
+
+    public Boolean getForbiddenZonesActive() {
+        return forbiddenZonesActive;
+    }
+
+    public void setForbiddenZonesActive(Boolean forbiddenZonesActive) {
+        this.forbiddenZonesActive = forbiddenZonesActive;
+    }
+
+    public String getForbiddenZoneStart() {
+        return forbiddenZoneStart;
+    }
+
+    public void setForbiddenZoneStart(String forbiddenZoneStart) {
+        this.forbiddenZoneStart = forbiddenZoneStart;
+    }
+
+    public String getForbiddenZoneEnd() {
+        return forbiddenZoneEnd;
+    }
+
+    public void setForbiddenZoneEnd(String forbiddenZoneEnd) {
+        this.forbiddenZoneEnd = forbiddenZoneEnd;
     }
 }
