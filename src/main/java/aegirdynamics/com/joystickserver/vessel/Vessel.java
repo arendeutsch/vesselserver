@@ -177,4 +177,22 @@ public class Vessel {
         this.Aeq.set(1, thrusterNumber, 1);
         this.Aeq.set(2, thrusterNumber, position);
     }
+
+    //Calculates cost function given the solution of the QP solver
+    private double CalculateCostFunction(double[] sol){
+
+        DoubleMatrix2D solution = new DenseDoubleMatrix2D(sol.length,1);
+        for (int i=0;i<sol.length;i++)
+            solution.set(i, 0, sol[i]);
+
+        DoubleMatrix2D Wu = new DenseDoubleMatrix2D(sol.length,1);
+        DoubleMatrix2D u_transpos = new DenseDoubleMatrix2D(1, sol.length);
+
+        DenseDoubleMatrix2D costFunction = new DenseDoubleMatrix2D(1, 1);
+        this.getHMatrix().zMult(solution, Wu);
+        u_transpos = solution.viewDice();
+        u_transpos.zMult(Wu, costFunction);
+        return costFunction.get(0, 0);
+    }
+
 }

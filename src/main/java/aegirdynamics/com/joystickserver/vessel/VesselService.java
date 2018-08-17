@@ -68,14 +68,20 @@ public class VesselService {
         Double surge = Double.parseDouble(cmd.get("surge"));
         Double sway = Double.parseDouble(cmd.get("sway"));
         // TODO: get yaw rotation (z axis)
+
+        Vessel vessel = this.getVessel(vesselId).get();
         double[] force = {surge, sway, 0.0};
         try {
-            double[] sol = this.calculateSolution(vesselId, force);
+            long startTime = System.currentTimeMillis();
+            int[] s = {0,0}; // decision variable
+            double[] sol = this.calculateSolution(vesselId, force, s);
             HashMap<String, Object[]> responseSolution = new HashMap<>();
 
+            ArrayList<Double> costEvaluations = new ArrayList<>();
             ArrayList<Double> thrust = new ArrayList<>();
             ArrayList<Double> angle = new ArrayList<>();
             ArrayList<Integer> type = new ArrayList<>();
+            ArrayList<Integer> thrusterWithForbiddenZones = new ArrayList<>();
 
             List<Thruster> thrusters = thrusterService.getAllThrusters(vesselId); // List all of vessel thrusters with the vessel it self
             int index = 0;
@@ -92,26 +98,59 @@ public class VesselService {
                         thrust.add(Math.sqrt(Math.pow(sol[index], 2) + Math.pow(sol[index+1], 2)));
                         angle.add((Math.atan2(sol[index+1],sol[index]) * 180/Math.PI));
                         index+=2;
+                        if (thruster.getForbiddenZonesActive()) {
+                            thrusterWithForbiddenZones.add(thruster.getNumber());
+                        }
                         break;
                     case ThrusterType.RUDDER:
                         //TODO
                         break;
                 }
             }
-//            double angle1 = Math.atan2(sol[3],sol[2]);
-//            double angle2 = Math.atan2(sol[5],sol[4]);
-//            double thrust3 = Math.sqrt(Math.pow(sol[2], 2)+Math.pow(sol[3], 2));
-//            double thrust4 = Math.sqrt(Math.pow(sol[4], 2)+Math.pow(sol[5], 2));
-//
-//            System.out.println("\nThruster 1 [%]: " + sol[0] +
-//                    "\nThruster 2 [%]: " + sol[1]+
-//                    "\nThruster 3 [%]: " + thrust3 + " angle = " + angle1 * 180 / Math.PI +
-//                    "\nThruster 4 [%]: " + thrust4 + " angle = " + angle2 * 180 / Math.PI);
 
-//            System.out.println("\nThruster 1 [%]: " + sol[0] / 2300 * 100 +
-//                    "\nThruster 2 [%]: " + sol[1] / 2300 * 100 +
-//                    "\nThruster 3 [%]: " + thrust3 / 2500 * 100 + " angle = " + angle1 * 180 / Math.PI +
-//                    "\nThruster 4 [%]: " + thrust4 / 2500 * 100 + " angle = " + angle2 * 180 / Math.PI);
+            // in case of inequalities, need to check if angle is within forbidden zone.
+            // if this is the case we need to reallocate with different decision variable s
+            if (!thrusterWithForbiddenZones.isEmpty()) {
+                for (int i = 0; i < thrusterWithForbiddenZones.size(); i++) {
+                    int thrusterNumber = thrusterWithForbiddenZones.get(i);
+                    Double fobiddenAngleStart = Double.valueOf(thrusters.get(thrusterNumber-1).getForbiddenZoneStart());
+                    Double forbiddenAngleEnd = Double.valueOf(thrusters.get(thrusterNumber-1).getForbiddenZoneEnd());
+                    if (angle.get(thrusterNumber-1) >  fobiddenAngleStart && angle.get(thrusterNumber-1) < forbiddenAngleEnd) {
+                        thrust.clear();
+                        angle.clear();
+                        type.clear();
+                        thrusterWithForbiddenZones.clear();
+                        s[0] = 1;
+                        s[1] = 0;
+                        sol = this.calculateSolution(vesselId, force, s);
+                        costEvaluations.add(vessel.calculateCostFunction(sol));
+
+                        index = 0;
+                        for (Thruster thruster : thrusters) {
+                            switch (thruster.getType()) {
+                                case ThrusterType.TUNNEL:
+                                    type.add(ThrusterType.TUNNEL);
+                                    thrust.add(sol[index]);
+                                    angle.add(0.0);
+                                    index++;
+                                    break;
+                                case ThrusterType.AZIMUTH:
+                                    type.add(ThrusterType.AZIMUTH);
+                                    thrust.add(Math.sqrt(Math.pow(sol[index], 2) + Math.pow(sol[index+1], 2)));
+                                    angle.add((Math.atan2(sol[index+1],sol[index]) * 180/Math.PI));
+                                    index+=2;
+                                    if (thruster.getForbiddenZonesActive()) {
+                                        thrusterWithForbiddenZones.add(thruster.getNumber());
+                                    }
+                                    break;
+                                case ThrusterType.RUDDER:
+                                    //TODO
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
 
             Double[] thrustArray = new Double[thrust.size()];
             thrustArray = thrust.toArray(thrustArray);
@@ -132,6 +171,9 @@ public class VesselService {
             responseSolution.put("angle", angleArray);
             responseSolution.put("thruster_type", typeArray);
 
+            long endTime = System.currentTimeMillis();
+            System.out.println("Execution time with QP " + (endTime - startTime) + " milliseconds");
+
             return responseSolution;
         } catch (JOptimizerException e) {
             e.printStackTrace();
@@ -140,13 +182,11 @@ public class VesselService {
         return null;
     }
 
-    private double[] calculateSolution(int vesselId, double[] force) throws JOptimizerException {
-        long startTime = System.currentTimeMillis();
+    private double[] calculateSolution(int vesselId, double[] force, int[] s) throws JOptimizerException {
         List<Thruster> thrusters = thrusterService.getAllThrusters(vesselId); // List all of vessel thrusters with the vessel it self
 
         Vessel vessel = thrusters.get(0).getVessel();
 
-//        double[] powerCoeffecients = {1,1,0.533,0.533,0.533,0.533};
         ArrayList<Double> powerCoefficients = new ArrayList<>();
         ArrayList<Integer> thrusterType = new ArrayList<>();
         ArrayList<Double> thrusterPositionFromCG = new ArrayList<>();
@@ -174,12 +214,8 @@ public class VesselService {
 //        DoubleMatrix1D beq = new DenseDoubleMatrix1D(new double[]{1350, 888.2873, 54987.42});
         DoubleMatrix1D beq = new DenseDoubleMatrix1D(force);
 
-        int[] s = {0,0}; // decision variable
         //inequalities
         ConvexMultivariateRealFunction[] inequalities = this.setInequalities(thrusters, 24, s);
-
-        //optimization problem
-        OptimizationRequest or = new OptimizationRequest();
 
         //optimization
         JOptimizer opt = new JOptimizer();
@@ -198,21 +234,6 @@ public class VesselService {
         opt.optimize();
 
         double[] sol = opt.getOptimizationResponse().getSolution();
-        // incase of inequalities, need to check if angle is within forbidden zone.
-        // if this is the case we need to reallocate with different decision variable s
-        double angle = Math.atan2(sol[5], sol[4]) * 180 / Math.PI;
-        if (angle > 85 && angle < 105) {
-            s[0] = 1;
-            s[1] = 0;
-            inequalities = this.setInequalities(thrusters, 24, s);
-            orr.setFi(inequalities);
-            opt.setOptimizationRequest(orr);
-            opt.optimize();
-            sol = opt.getOptimizationResponse().getSolution();
-        }
-
-        long endTime = System.currentTimeMillis();
-        System.out.println("Execution time with QP " + (endTime - startTime) + " milliseconds");
 
         return sol;
     }
@@ -259,8 +280,9 @@ public class VesselService {
                         h[rowCounter-2] = -Math.cos(theta);
                         h[rowCounter-1] = -Math.sin(theta);
                         inequalities[columnCounter + k] = new LinearMultivariateRealFunction(h, -r);
-                        columnCounter++;
+
                     }
+                    columnCounter += N;
                     if (thruster.getForbiddenZonesActive()) {
                         Double M = Double.valueOf(thruster.getEffect()); //big-M constant
                         // angles are counterclockwise

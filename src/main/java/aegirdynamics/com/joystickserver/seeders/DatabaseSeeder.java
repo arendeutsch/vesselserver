@@ -106,8 +106,7 @@ public class DatabaseSeeder {
             vessel.setDate("2011-05-12");
             vessel.setLength("76.66");
             vessel.setWidth("16.41");
-//            vessel.setStageAnchorPoints("[41,133,164,13,224,10,328,145,325,165,326,265,326,366,325,383,229,398,125,401,40,389,38,374,35,281,36,153]");
-            vessel.setStageAnchorPoints("[44,145,155,0,237,-2,334,140,336,140,338,285,336,362,335,362,297,393,76,391,44,368,45,367,44,277,43,143]");
+            vessel.setStageAnchorPoints("[34,207,197,0,220,3,379,215,379,215,379,345,376,488,376,487,313,523,101,528,35,490,35,490,32,330,34,206]");
             vessel.setType(1);
             vesselRepository.save(vessel);
             System.out.println("Done seeding vessel table");
@@ -127,7 +126,7 @@ public class DatabaseSeeder {
             t1.setType(1);
             t1.setX_cg("7");
             t1.setY_cg("34");
-            t1.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":228,\"y\":81,\"rotation\":90,\"width\":14,\"height\":85,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"}");
+            t1.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":248,\"y\":114,\"rotation\":90,\"width\":14,\"height\":85,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":2,\"shadowOffsetY\":2,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"}");
             t1.setVessel(vessel);
             thrusterRepository.save(t1);
 
@@ -137,7 +136,7 @@ public class DatabaseSeeder {
             t2.setType(1);
             t2.setX_cg("7");
             t2.setY_cg("30");
-            t2.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":229,\"y\":129,\"rotation\":90,\"width\":14,\"height\":85,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"}");
+            t2.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":248,\"y\":160,\"rotation\":90,\"width\":14,\"height\":85,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":2,\"shadowOffsetY\":2,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"}");
             t2.setVessel(vessel);
             thrusterRepository.save(t2);
 
@@ -147,7 +146,9 @@ public class DatabaseSeeder {
             t3.setType(2);
             t3.setX_cg("11");
             t3.setY_cg("-35");
-            t3.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":101,\"y\":333,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffset\":{\"x\":8,\"y\":8},\"startScale\":1,\"shadowOffsetX\":null,\"shadowOffsetY\":null},\"className\":\"Group\",\"children\":[{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Ring\"},{\"attrs\":{\"x\":-7,\"y\":-37,\"width\":14,\"height\":74,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"},{\"attrs\":{\"y\":-45,\"sides\":3,\"radius\":6.5,\"stroke\":\"black\",\"strokeWidth\":1,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"RegularPolygon\"}]}");
+            t3.setForbiddenZonesActive(false);
+//            t3.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":101,\"y\":333,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffset\":{\"x\":8,\"y\":8},\"startScale\":1,\"shadowOffsetX\":null,\"shadowOffsetY\":null},\"className\":\"Group\",\"children\":[{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Ring\"},{\"attrs\":{\"x\":-7,\"y\":-37,\"width\":14,\"height\":74,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"},{\"attrs\":{\"y\":-45,\"sides\":3,\"radius\":6.5,\"stroke\":\"black\",\"strokeWidth\":1,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"RegularPolygon\"}]}");
+            t3.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":109,\"y\":436,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffset\":{\"x\":8,\"y\":8},\"startScale\":1,\"shadowOffsetX\":null,\"shadowOffsetY\":null},\"className\":\"Group\",\"children\":[{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Ring\"},{\"attrs\":{\"x\":-7,\"y\":-37,\"width\":14,\"height\":74,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"},{\"attrs\":{\"y\":-45,\"sides\":3,\"radius\":6.5,\"stroke\":\"black\",\"strokeWidth\":1,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"startScale\":1,\"dash\":[0,0],\"fill\":\"black\"},\"className\":\"RegularPolygon\"}]}");
             t3.setVessel(vessel);
             thrusterRepository.save(t3);
 
@@ -157,7 +158,11 @@ public class DatabaseSeeder {
             t4.setType(2);
             t4.setX_cg("-11");
             t4.setY_cg("-35");
-            t4.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":261,\"y\":330,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffset\":{\"x\":8,\"y\":8},\"startScale\":1,\"shadowOffsetX\":null,\"shadowOffsetY\":null},\"className\":\"Group\",\"children\":[{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Ring\"},{\"attrs\":{\"x\":-7,\"y\":-37,\"width\":14,\"height\":74,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"},{\"attrs\":{\"y\":-45,\"sides\":3,\"radius\":6.5,\"stroke\":\"black\",\"strokeWidth\":1,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"RegularPolygon\"}]}");
+            t4.setForbiddenZonesActive(true);
+            t4.setForbiddenZoneStart("85");
+            t4.setForbiddenZoneEnd("105");
+//            t4.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":261,\"y\":330,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffset\":{\"x\":8,\"y\":8},\"startScale\":1,\"shadowOffsetX\":null,\"shadowOffsetY\":null},\"className\":\"Group\",\"children\":[{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Ring\"},{\"attrs\":{\"x\":-7,\"y\":-37,\"width\":14,\"height\":74,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"},{\"attrs\":{\"y\":-45,\"sides\":3,\"radius\":6.5,\"stroke\":\"black\",\"strokeWidth\":1,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffsetX\":5,\"shadowOffsetY\":5,\"startScale\":1,\"dash\":[0,0]},\"className\":\"RegularPolygon\"},{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"angle\":20,\"rotation\":-5,\"fill\":\"#A71212\",\"stroke\":\"black\",\"strokeWidth\":1.2},\"className\":\"Arc\"}]}");
+            t4.setStageNode("{\"attrs\":{\"draggable\":true,\"x\":301,\"y\":431,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"shadowOffset\":{\"x\":8,\"y\":8},\"startScale\":1,\"shadowOffsetX\":null,\"shadowOffsetY\":null},\"className\":\"Group\",\"children\":[{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Ring\"},{\"attrs\":{\"x\":-7,\"y\":-37,\"width\":14,\"height\":74,\"cornerRadius\":3,\"stroke\":\"black\",\"strokeWidth\":1.2,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"startScale\":1,\"dash\":[0,0]},\"className\":\"Rect\"},{\"attrs\":{\"y\":-45,\"sides\":3,\"radius\":6.5,\"stroke\":\"black\",\"strokeWidth\":1,\"opacity\":0.8,\"shadowOpacity\":0.6,\"shadowColor\":\"black\",\"shadowBlur\":10,\"startScale\":1,\"dash\":[0,0],\"fill\":\"black\"},\"className\":\"RegularPolygon\"},{\"attrs\":{\"innerRadius\":40,\"outerRadius\":55,\"angle\":20,\"rotation\":-5,\"fill\":\"#A71212\",\"stroke\":\"black\",\"strokeWidth\":1.2},\"className\":\"Arc\"}]}");
             t4.setVessel(vessel);
             thrusterRepository.save(t4);
 
